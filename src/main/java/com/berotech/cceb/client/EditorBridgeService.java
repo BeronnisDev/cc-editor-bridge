@@ -52,6 +52,35 @@ public final class EditorBridgeService {
         return server != null;
     }
 
+    public static BridgeStatus status() {
+        int port = Config.SOCKET_PORT.get();
+        if (server == null) {
+            return new BridgeStatus(
+                    Config.ENABLED.get(),
+                    false,
+                    port,
+                    EditorAuth.isRequired(),
+                    0,
+                    0,
+                    Config.PREFER_LABEL_IDS.get()
+            );
+        }
+
+        return new BridgeStatus(
+                Config.ENABLED.get(),
+                true,
+                server.getPort(),
+                EditorAuth.isRequired(),
+                server.getConnectionCount(),
+                server.getAuthenticatedConnectionCount(),
+                Config.PREFER_LABEL_IDS.get()
+        );
+    }
+
+    public static int getPort() {
+        return server == null ? Config.SOCKET_PORT.get() : server.getPort();
+    }
+
     public static void forwardFileEvent(FileEventPayload payload) {
         if (server == null) {
             return;

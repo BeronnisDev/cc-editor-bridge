@@ -177,20 +177,20 @@ Build a Minecraft 1.21.1 NeoForge mod that bridges external editors with CC: Twe
 ### Task 5.2: Add Editor Protocol Documentation
 - **Goal**: Clear spec for external editor implementations
 - **Steps**:
-  - [ ] Document message format (JSON schema)
-  - [ ] Document handshake sequence
-  - [ ] Document all request/response types
-  - [ ] Add example client code
+  - [x] Document message format (JSON schema)
+  - [x] Document handshake sequence
+  - [x] Document all request/response types
+  - [x] Add example client code
 - **Test**: Implement example editor client against spec — [ ]
 - **Acceptance**: Third party can implement compatible editor — [ ]
 
 ### Task 5.3: Add Debug Commands
 - **Goal**: Easy in-game testing and debugging
 - **Steps**:
-  - [ ] Add `/cceditor status` - show socket server status
-  - [ ] Add `/cceditor test` - run self-test of server connection
-  - [ ] Add `/cceditor list <computer>` - list files on computer
-  - [ ] Add in-game config reload command
+  - [x] Add `/cceditor status` - show socket server status
+  - [x] Add `/cceditor test` - run self-test of server connection
+  - [x] Add `/cceditor list <computer>` - list files on computer
+  - [x] Add in-game config reload command
 - **Test**: Run commands in single-player world — [ ]
 - **Acceptance**: All commands work and show useful output — [ ]
 

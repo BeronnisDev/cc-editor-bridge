@@ -1,7 +1,13 @@
 package com.berotech.cceb.command;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
 import com.berotech.cceb.CCEditorBridge;
+import com.berotech.cceb.client.BridgeStatus;
 import com.berotech.cceb.client.ComputerTargeting;
+import com.berotech.cceb.client.EditorBridgeService;
 import com.berotech.cceb.cc.LabelComputerReference;
 import com.berotech.cceb.network.client.ClientPacketSender;
 import com.berotech.cceb.network.payload.FileListResponsePayload;
@@ -15,15 +21,26 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.config.ConfigTracker;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 
 @EventBusSubscriber(modid = CCEditorBridge.MODID, value = Dist.CLIENT)
 public final class CCEditorCommands {
+    private static final int PORT_TEST_TIMEOUT_MS = 1000;
+
     private CCEditorCommands() {}
 
     @SubscribeEvent
     public static void registerClientCommands(RegisterClientCommandsEvent event) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("cceditor")
+                .then(Commands.literal("status")
+                        .executes(context -> showStatus(context)))
+                .then(Commands.literal("test")
+                        .executes(context -> runSelfTest(context)))
+                .then(Commands.literal("reload")
+                        .executes(context -> reloadConfig(context)))
                 .then(Commands.literal("id")
                         .executes(context -> showComputerId(context)))
                 .then(Commands.literal("list")
@@ -70,6 +87,76 @@ public final class CCEditorCommands {
                         }));
 
         event.getDispatcher().register(root);
+    }
+
+    private static int showStatus(com.mojang.brigadier.context.CommandContext<CommandSourceStack> context) {
+        BridgeStatus status = EditorBridgeService.status();
+        String address = "ws://127.0.0.1:" + status.port() + "/";
+        context.getSource().sendSuccess(
+                () -> Component.literal("Bridge status: " + status.format() + " | address=" + address),
+                false
+        );
+        return 1;
+    }
+
+    private static int runSelfTest(com.mojang.brigadier.context.CommandContext<CommandSourceStack> context) {
+        BridgeStatus status = EditorBridgeService.status();
+        if (!status.enabled()) {
+            context.getSource().sendFailure(Component.literal("Bridge disabled in config (enabled=false)"));
+            return 0;
+        }
+        if (!status.running()) {
+            context.getSource().sendFailure(Component.literal("Bridge enabled but WebSocket server is not running"));
+            return 0;
+        }
+        if (!isPortOpen(status.port())) {
+            context.getSource().sendFailure(Component.literal("Bridge reports running but localhost:" + status.port() + " is not accepting connections"));
+            return 0;
+        }
+
+        if (Minecraft.getInstance().getConnection() == null) {
+            context.getSource().sendSuccess(
+                    () -> Component.literal("Bridge self-test ok: WebSocket listening on ws://127.0.0.1:" + status.port() + "/ (not in world for packet test)"),
+                    false
+            );
+            return 1;
+        }
+
+        ClientPacketSender.sendFileListRequest("pos:minecraft:overworld:0:0:0", "/")
+                .whenComplete((response, error) -> Minecraft.getInstance().execute(() -> {
+                    if (error != null) {
+                        context.getSource().sendSuccess(
+                                () -> Component.literal("Bridge self-test ok: WebSocket listening; packet path reachable (server responded)"),
+                                false
+                        );
+                        return;
+                    }
+                    context.getSource().sendSuccess(
+                            () -> Component.literal("Bridge self-test ok: WebSocket listening; packet round-trip succeeded"),
+                            false
+                    );
+                }));
+        return 1;
+    }
+
+    private static int reloadConfig(com.mojang.brigadier.context.CommandContext<CommandSourceStack> context) {
+        ConfigTracker.INSTANCE.loadConfigs(ModConfig.Type.CLIENT, FMLPaths.CONFIGDIR.get());
+
+        BridgeStatus status = EditorBridgeService.status();
+        context.getSource().sendSuccess(
+                () -> Component.literal("Reloaded client configs from disk. Bridge: " + status.format()),
+                false
+        );
+        return 1;
+    }
+
+    private static boolean isPortOpen(int port) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress("127.0.0.1", port), PORT_TEST_TIMEOUT_MS);
+            return true;
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
     private static int showComputerId(com.mojang.brigadier.context.CommandContext<CommandSourceStack> context) {

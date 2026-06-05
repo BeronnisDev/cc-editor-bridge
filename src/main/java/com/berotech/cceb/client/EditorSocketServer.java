@@ -53,4 +53,23 @@ public class EditorSocketServer extends WebSocketServer {
             }
         }
     }
+
+    public int getPort() {
+        return getAddress().getPort();
+    }
+
+    public int getConnectionCount() {
+        return getConnections().size();
+    }
+
+    public int getAuthenticatedConnectionCount() {
+        int count = 0;
+        for (WebSocket connection : getConnections()) {
+            EditorConnectionState state = (EditorConnectionState) connection.getAttachment();
+            if (state != null && state.isAuthenticated()) {
+                count++;
+            }
+        }
+        return count;
+    }
 }
