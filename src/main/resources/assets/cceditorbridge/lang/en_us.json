@@ -4,10 +4,9 @@
   "item.cceditorbridge.example_item": "Example Item",
 
   "cceditorbridge.configuration.title": "CC Editor Bridge Configs",
-  "cceditorbridge.configuration.section.cceditorbridge.common.toml": "CC Editor Bridge Configs",
-  "cceditorbridge.configuration.section.cceditorbridge.common.toml.title": "CC Editor Bridge Configs",
-  "cceditorbridge.configuration.items": "Item List",
-  "cceditorbridge.configuration.logDirtBlock": "Log Dirt Block",
-  "cceditorbridge.configuration.magicNumberIntroduction": "Magic Number Text",
-  "cceditorbridge.configuration.magicNumber": "Magic Number"
+  "cceditorbridge.configuration.section.cceditorbridge.client.toml": "Editor Bridge",
+  "cceditorbridge.configuration.section.cceditorbridge.client.toml.title": "Editor Bridge",
+  "cceditorbridge.configuration.enabled": "Enable Editor Bridge",
+  "cceditorbridge.configuration.socketPort": "WebSocket Port",
+  "cceditorbridge.configuration.authToken": "Auth Token"
 }

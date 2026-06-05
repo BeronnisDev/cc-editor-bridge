@@ -32,12 +32,12 @@ Build a Minecraft 1.21.1 NeoForge mod that bridges external editors with CC: Twe
 ### Task 1.3: Add Configuration System
 - **Goal**: Mod has configurable settings for socket port and auth token
 - **Steps**:
-  - [x] Create config class using NeoForge `ModConfigSpec` (template config exists; bridge fields pending)
-  - [ ] Add fields: `socketPort` (int, default 8765), `authToken` (String, optional), `enabled` (boolean)
-  - [ ] Register bridge config on both client and server (COMMON config registered; needs bridge-specific fields)
-  - [ ] Add config reload callback
-- **Test**: Launch game, verify config file is created in `config/` — [ ]
-- **Acceptance**: Config file exists, values can be changed and reloaded — [ ]
+  - [x] Create config class using NeoForge `ModConfigSpec`
+  - [x] Add fields: `socketPort` (int, default 8765), `authToken` (String, optional), `enabled` (boolean)
+  - [x] Register bridge config as CLIENT config (socket server is client-only)
+  - [x] Add config reload callback
+- **Test**: Launch game, verify config file is created in `config/` — [x]
+- **Acceptance**: Config file exists, values can be changed and reloaded — [x]
 
 ---
 
